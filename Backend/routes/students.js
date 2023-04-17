@@ -9,7 +9,7 @@ import {
 const router = Router();
 
 router.post("/add", addStudent);
-router.post("/update", updateMarks);
+router.post("/update/:studentId", updateMarks);
 router.post("/submit", finalize);
 router.post("/delete", deleteStudent);
 
