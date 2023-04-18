@@ -2,15 +2,15 @@ import { Router } from "express";
 import {
   addStudent,
   deleteStudent,
-  finalize,
   updateMarks,
+  viewStudents,
 } from "../controllers/student.js";
 
 const router = Router();
 
 router.post("/add", addStudent);
 router.post("/update/:studentId", updateMarks);
-router.post("/submit", finalize);
-router.post("/delete", deleteStudent);
+router.get("/view", viewStudents);
+router.post("/delete/:studentId", deleteStudent);
 
 export default router;
