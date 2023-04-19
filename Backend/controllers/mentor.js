@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import mentors from "../Models/Mentor.js";
 import Students from "../Models/Student.js";
+
+//Adding mentors
 export const addMentor = async (req, res) => {
   try {
     const { MentorName } = req.body;
@@ -15,6 +17,18 @@ export const addMentor = async (req, res) => {
     res.status(500).json({ success: "false", message: err });
   }
 };
+
+//Showing all the mentors
+export const showMentor = async (req, res) => {
+  try {
+    const getMentor = await mentors.find({});
+    res.status(200).json({ success: "true", data: getMentor });
+  } catch (err) {
+    res.status(500).json({ success: "false", message: err });
+  }
+};
+
+//
 export const submitMarks = async (req, res) => {
   try {
     const { student } = req.body;

@@ -12,8 +12,7 @@ const student = mongoose.Schema({
   Explanation: { type: Number, max: 10, default: -1 },
   TotalMarks: { type: Number, max: 40, default: -1 },
   mentorId: {
-    type: Schema.Types.ObjectId,
-    ref: "Mentors",
+    type: String,
   },
 });
 

@@ -1,5 +1,7 @@
+import mongoose, { isObjectIdOrHexString } from "mongoose";
 import Students from "../Models/Student.js";
 
+//Adding new Student
 export const addStudent = async (req, res) => {
   try {
     const { Name, Email } = req.body;
@@ -10,10 +12,13 @@ export const addStudent = async (req, res) => {
   }
 };
 
+//Updating Student Marks
 export const updateMarks = async (req, res) => {
   try {
     const { Design, Implementation, CodeQuality, Explanation } = req.body;
     const studentId = req.params.studentId;
+    console.log(studentId);
+    console.log(req.body);
 
     const updateData = {
       Design,
@@ -56,6 +61,7 @@ export const updateMarks = async (req, res) => {
   }
 };
 
+//Fetching all Students
 export const viewStudents = async (req, res) => {
   try {
     const students = await Students.find({});
@@ -65,6 +71,7 @@ export const viewStudents = async (req, res) => {
   }
 };
 
+//Deleting Student
 export const deleteStudent = async (req, res) => {
   try {
     const studentId = req.params.studentId;
@@ -73,6 +80,47 @@ export const deleteStudent = async (req, res) => {
       .status(200)
       .json({ success: "true", message: "Student sucessfully deleted" });
   } catch (error) {
+    res.status(500).json({ success: "false", message: err });
+  }
+};
+
+//Filter Student by Specific  Terms
+export const filterStudent = async (req, res) => {
+  try {
+    console.log(req.query);
+    const val = req.query.value;
+    const filter = await Students.find({ val });
+    res.status(200).json({ success: "true", data: filter });
+  } catch (error) {
+    res.status(500).json({ success: "false", message: err });
+  }
+};
+
+//Assigning Mentor to Students
+
+export const assignMentor = async (req, res) => {
+  try {
+    const { param1, param2 } = req.query;
+
+    console.log(param1, param2);
+    const assign = await Students.findOne({ _id: param1 });
+    assign.mentorId = param2;
+    await assign.save();
+    res.status(200).json({ success: "true", message: "Mentor Assigned" });
+  } catch (error) {
+    res.status(500).json({ success: "false", message: error });
+  }
+};
+
+export const getStudentsByMentor = async (req, res) => {
+  try {
+    const mentorId = req.params.mentor;
+
+    const students = await Students.find({ mentorId: mentorId });
+
+    res.status(200).json({ success: "true", data: students });
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ success: "false", message: err });
   }
 };
