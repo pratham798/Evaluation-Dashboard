@@ -39,17 +39,7 @@ export const updateMarks = async (req, res) => {
     changeMarks.Explanation = Explanation;
 
     let TotalMarks = 0;
-
-    if (
-      Design != -1 &&
-      Implementation != -1 &&
-      CodeQuality != -1 &&
-      Explanation != -1
-    ) {
-      TotalMarks = Design + Implementation + CodeQuality + Explanation;
-    } else {
-      TotalMarks = -1;
-    }
+    TotalMarks = Design + Implementation + CodeQuality + Explanation;
 
     changeMarks.TotalMarks = TotalMarks;
     await changeMarks.save();
@@ -105,8 +95,26 @@ export const assignMentor = async (req, res) => {
     console.log(param1, param2);
     const assign = await Students.findOne({ _id: param1 });
     assign.mentorId = param2;
+    assign.isAssigned = true;
     await assign.save();
     res.status(200).json({ success: "true", message: "Mentor Assigned" });
+  } catch (error) {
+    res.status(500).json({ success: "false", message: error });
+  }
+};
+
+// Unassigning Mentor from Students
+
+export const unassignMentor = async (req, res) => {
+  try {
+    const { param1, param2 } = req.query;
+
+    console.log(param1, param2);
+    const assign = await Students.findOne({ _id: param1 });
+    assign.mentorId = "";
+    assign.isAssigned = false;
+    await assign.save();
+    res.status(200).json({ success: "true", message: "Student UnAssigned" });
   } catch (error) {
     res.status(500).json({ success: "false", message: error });
   }
@@ -119,6 +127,21 @@ export const getStudentsByMentor = async (req, res) => {
     const students = await Students.find({ mentorId: mentorId });
 
     res.status(200).json({ success: "true", data: students });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: "false", message: err });
+  }
+};
+
+export const evaluateStudent = async (req, res) => {
+  try {
+    const student = req.params.studentId;
+
+    const studentData = await Students.findOne({ _id: student });
+    studentData.isEvaluated = true;
+    await studentData.save();
+
+    res.status(200).json({ success: "true", message: "Student Evaluated" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: "false", message: err });

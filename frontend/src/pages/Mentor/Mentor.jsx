@@ -1,44 +1,53 @@
 import React, { useState, useEffect } from "react";
 import "./mentor.css";
-
-const students = [
-  {
-    id: 1,
-    name: "John Doe",
-    english: 75,
-    math: 80,
-    science: 85,
-    isAssigned: false,
-    isLocked: true,
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    english: 85,
-    math: 90,
-    science: 95,
-    isAssigned: false,
-    isLocked: true,
-  },
-  {
-    id: 3,
-    name: "Bob Johnson",
-    english: 70,
-    math: 75,
-    science: 80,
-    isAssigned: false,
-    isLocked: true,
-  },
-];
+import { toast } from "react-toastify";
 
 const Mentor = ({ data, coach }) => {
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [showFilter, setShowFilter] = useState(false);
-  const [filteredData, setFilteredData] = useState(data);
-  const [filterOption, setFilterOption] = useState("All");
+  //Removing Students
+  const removeStudent = async (student, mentorId) => {
+    console.log(student._id + "yo " + mentorId);
+    const studentId = student._id;
+    await fetch(
+      `http://localhost:3001/api/v1/students/unassign?param1=${studentId}&param2=${mentorId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    await fetch(`http://localhost:3001/api/v1/mentor/decrease/${mentorId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
 
   //Fetching All mentors
   const [mentors, setMentor] = useState([]);
+
+  //Update Student
+  const updateStudent = async (student) => {
+    const updatedStudent = {
+      Design: student.Design,
+      Implementation: student.Implementation,
+      CodeQuality: student.CodeQuality,
+      Explanation: student.Explanation,
+      TotalMarks: student.TotalMarks,
+    };
+    await fetch(`http://localhost:3001/api/v1/students/update/${student._id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedStudent),
+    });
+
+    toast.info("Student Updated");
+  };
+
   useEffect(() => {
     const fetchMentors = async () => {
       const allMentors = await fetch(
@@ -51,72 +60,50 @@ const Mentor = ({ data, coach }) => {
   }, []);
 
   //Fetching Students by mentorId
-  const getStudentData = (id) => {
-    const getData = async () => {
-      const response = await fetch(
-        `http://localhost:3001/api/v1/students/studentbyMentor/${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      // (await response.json());
-      let res = await response.json();
-      return res.data;
-    };
-
-    let data = getData();
-    return data;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedStudent((prevStudent) => ({
-      ...prevStudent,
-      [name]: value,
-    }));
-  };
-
-  //Update Student
-  const updateStudent = async (student) => {
-    const updatedStudent = {
-      Name: student.Name,
-      Email: student.Email,
-    };
-    await fetch(`http://localhost:3001/api/v1/students/update/${student._id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedStudent),
-    });
-  };
-
-  const handleEditClick = (student) => {
-    setSelectedStudent(student);
-  };
-
-  const handleDialogClose = () => {
-    setSelectedStudent(null);
-  };
-  const handleIsAssignedClick = (event) => {
-    setSelectedStudent({
-      ...selectedStudent,
-      isAssigned: event.target.checked,
-    });
-  };
-
-  const handleIsLockedClick = (event) => {
-    setSelectedStudent({
-      ...selectedStudent,
-      isLocked: event.target.checked,
-    });
-  };
-
-  const MentorList = ({ data, coach }) => {
+  const MentorList = ({ coach }) => {
+    const [selectedStudent, setSelectedStudent] = useState(null);
     const [studentData, setStudentData] = useState([]);
+    //Evaluation Students
+    const evaluateStudent = async (studentData) => {
+      console.log(studentData);
+      {
+        studentData.map(
+          async (studentId) =>
+            await fetch(
+              `http://localhost:3001/api/v1/students/evaluate/${studentId._id}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+        );
+      }
+      studentData.map((student) => {
+        student.isEvaluated = false;
+      });
+    };
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setSelectedStudent((prevStudent) => ({
+        ...prevStudent,
+        [name]: Number(value),
+      }));
+    };
+
+    const handleEditClick = (student) => {
+      if (student.isEvaluated) {
+        toast.warn("Student Already Evaluated");
+        return;
+      }
+      setSelectedStudent(student);
+    };
+
+    const handleDialogClose = () => {
+      setSelectedStudent(null);
+    };
     useEffect(() => {
       const getStudentData = async (id) => {
         const getData = async () => {
@@ -131,7 +118,7 @@ const Mentor = ({ data, coach }) => {
           );
 
           let res = await response.json();
-          console.log(res);
+          // console.log(res);
           return res.data;
         };
 
@@ -139,13 +126,13 @@ const Mentor = ({ data, coach }) => {
         setStudentData(data);
       };
 
-      getStudentData(coach);
+      getStudentData(coach.MentorId);
     }, []);
     return (
       <div className="mentor">
-        <h1 className="heading">Mentor - {coach}</h1>
+        <h1 className="heading">Mentor - {coach.MentorName}</h1>
         <hr />
-        <p>List of all the Students that Mentor1 Assigned</p>
+        <p>List of all the Students that {coach.MentorName} Assigned</p>
         <hr />
 
         <div>
@@ -158,6 +145,8 @@ const Mentor = ({ data, coach }) => {
                 <th>CodeQuality</th>
                 <th>Explanation</th>
                 <th>Total Marks</th>
+                <th>Edit</th>
+                <th>Remove</th>
               </tr>
             </thead>
             <tbody>
@@ -170,7 +159,14 @@ const Mentor = ({ data, coach }) => {
                   <td>{data?.Explanation}</td>
                   <td>{data?.TotalMarks}</td>
                   <td>
-                    <button onClick={() => handleEditClick()}>Edit</button>
+                    <button onClick={() => handleEditClick(data)}>
+                      {!data.isEvaluated ? "Edit" : "Evaluated"}
+                    </button>
+                  </td>
+                  <td>
+                    <button onClick={() => removeStudent(data, coach.MentorId)}>
+                      Unassign
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -183,6 +179,7 @@ const Mentor = ({ data, coach }) => {
                 onSubmit={(e) => {
                   e.preventDefault();
                   updateStudent(selectedStudent);
+                  handleDialogClose();
                 }}
               >
                 <label>
@@ -239,7 +236,11 @@ const Mentor = ({ data, coach }) => {
               </form>
             </div>
           )}
-          <button type="Submit">Evaluate</button>
+          {coach.StudentCount >= 3 && (
+            <button type="Submit" onClick={() => evaluateStudent(studentData)}>
+              Evaluate
+            </button>
+          )}
         </div>
       </div>
     );
@@ -250,7 +251,7 @@ const Mentor = ({ data, coach }) => {
         <h2 className="heading1">Mentor List</h2>
         <p>List of all the Mentor of this Organisations</p>
         {mentors.map((mentor, index) => {
-          return <MentorList key={index} coach={mentor.MentorId} />;
+          return <MentorList key={index} coach={mentor} />;
         })}
       </div>
     </>

@@ -4,7 +4,7 @@ const mentor = mongoose.Schema({
   MentorName: { type: String, required: true },
   MentorId: { type: String, required: true },
   //Limit is assigned as the mentor could only assign minimum of 3 and maximum of 4 students
-  StudentCount: { type: Number, min: 3, max: 4, default: 0 },
+  StudentCount: { type: Number, max: 4, default: 0 },
 });
 
 const MentorSchema = mongoose.model("Mentors", mentor);

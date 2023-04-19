@@ -111,6 +111,13 @@ const Student = ({ data }) => {
         },
       }
     );
+
+    await fetch(`http://localhost:3001/api/v1/mentor/increase/${mentorId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   };
 
   const handleFilterChange = (event) => {
@@ -149,14 +156,20 @@ const Student = ({ data }) => {
     if (filterOption === "All") {
       setFilterStudentData(students);
       //   return students;
-    } else if (filterOption === "IsAssigned") {
-      let arr = students.filter((student) => student.isAssigned);
+    } else if (filterOption === "Assigned") {
+      let arr = students.filter(
+        (student) => student.isAssigned && !student.isEvaluated
+      );
       setFilterStudentData(arr);
-      //   return students.filter((student) => student.isAssigned);
-    } else if (filterOption === "IsEvaluated") {
-      return students.filter((student) => student.isEvaluated);
+    } else if (filterOption === "Evaluated") {
+      let arr = students.filter((student) => student.isEvaluated);
+      setFilterStudentData(arr);
+    } else if (filterOption === "NotAssigned") {
+      let arr = students.filter((student) => student.isAssigned === false);
+      setFilterStudentData(arr);
     }
   };
+
   useEffect(() => {
     filterStudents();
   }, [filterOption]);
@@ -183,8 +196,9 @@ const Student = ({ data }) => {
         <div className="filter-dropdown">
           <select value={filterOption} onChange={handleFilterChange}>
             <option value="All">All</option>
-            <option value="IsAssigned">Is Assigned</option>
-            <option value="IsEvaluated">Is Evaluated</option>
+            <option value="Assigned">Assigned</option>
+            <option value="NotAssigned">Not Assigned</option>
+            <option value="Evaluated">Evaluated</option>
           </select>
         </div>
       </div>
@@ -200,7 +214,7 @@ const Student = ({ data }) => {
               <th>CodeQuality</th>
               <th>Explanation</th>
               <th>Total Marks</th>
-              <th>Edit</th>
+              <th>Status</th>
               <th>Delete</th>
             </tr>
           </thead>
@@ -214,91 +228,31 @@ const Student = ({ data }) => {
                 <td>{student.Explanation}</td>
                 <td>{student.TotalMarks == -1 ? 0 : student.TotalMarks}</td>
                 <td>
-                  <button onClick={() => handleEditClick(student)}>Edit</button>
+                  <button
+                    onClick={() =>
+                      !student.isAssigned &&
+                      !student.isEvaluated &&
+                      AssignToMentor(student, currentMentor)
+                    }
+                  >
+                    {student.isEvaluated
+                      ? "Evaluated"
+                      : student.isAssigned
+                      ? "Already assigned"
+                      : "Assign"}
+                  </button>
                 </td>
                 <td>
-                  <button onClick={() => deleteStudent(student._id)}>
-                    Delete
-                  </button>
+                  {!student.isAssigned && (
+                    <button onClick={() => deleteStudent(student._id)}>
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {/* MODIFY STUDENT */}
-        {selectedStudent && (
-          <div className="dialog">
-            <h2>Edit Student Details</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                updateStudent(selectedStudent);
-              }}
-            >
-              <label>
-                Name:
-                <input
-                  type="text"
-                  name="Name"
-                  value={selectedStudent.Name}
-                  onChange={handleChange}
-                />
-              </label>
-              <label>
-                Design:
-                <input
-                  type="number"
-                  name="Design"
-                  value={selectedStudent.Design}
-                  onChange={handleChange}
-                />
-              </label>
-              <label>
-                Implementation:
-                <input
-                  type="number"
-                  name="Implementation"
-                  value={selectedStudent.Implementation}
-                  onChange={handleChange}
-                />
-              </label>
-              <label>
-                CodeQuality:
-                <input
-                  type="number"
-                  name="CodeQuality"
-                  value={selectedStudent.CodeQuality}
-                  onChange={handleChange}
-                />
-              </label>
-              <label>
-                Explanation:
-                <input
-                  type="number"
-                  name="Explanation"
-                  value={selectedStudent.Explanation}
-                  onChange={handleChange}
-                />
-              </label>
-              <div className="dialog-buttons">
-                <button type="submit">Save Changes</button>
-                <button type="button" onClick={handleDialogClose}>
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    !selectedStudent.isAssigned &&
-                      AssignToMentor(selectedStudent, currentMentor);
-                  }}
-                >
-                  {selectedStudent.isAssigned ? "Already assigned" : "Assign"}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
         {/* Adding Student */}
 
         {closeBox && (
@@ -317,6 +271,7 @@ const Student = ({ data }) => {
                   name="Name"
                   value={addStudent.Name}
                   onChange={changeValue}
+                  required
                 />
               </label>
               <label>
@@ -326,6 +281,7 @@ const Student = ({ data }) => {
                   name="Email"
                   value={addStudent.Email}
                   onChange={changeValue}
+                  required
                 />
               </label>
               <div className="dialog-buttons">

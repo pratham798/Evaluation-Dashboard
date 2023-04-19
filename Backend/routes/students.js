@@ -3,8 +3,10 @@ import {
   addStudent,
   assignMentor,
   deleteStudent,
+  evaluateStudent,
   filterStudent,
   getStudentsByMentor,
+  unassignMentor,
   updateMarks,
   viewStudents,
 } from "../controllers/student.js";
@@ -18,4 +20,6 @@ router.post("/delete/:studentId", deleteStudent);
 router.get("/filter", filterStudent);
 router.post("/assign", assignMentor);
 router.get("/studentbyMentor/:mentor", getStudentsByMentor);
+router.post("/unassign", unassignMentor);
+router.post("/evaluate/:studentId", evaluateStudent);
 export default router;

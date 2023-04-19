@@ -28,6 +28,32 @@ export const showMentor = async (req, res) => {
   }
 };
 
+//increase student count
+export const incCount = async (req, res) => {
+  const mentor = req.params.mentorId;
+  try {
+    const Mentor = await mentors.findOne({ MentorId: mentor });
+    Mentor.StudentCount = Mentor.StudentCount + 1;
+    await Mentor.save();
+    res.status(200).json({ success: "true", message: "count increased" });
+  } catch (error) {
+    res.status(500).json({ success: "false", message: error });
+  }
+};
+
+//decrease student count
+export const decCount = async (req, res) => {
+  const mentor = req.params.mentorId;
+  try {
+    const Mentor = await mentors.findOne({ MentorId: mentor });
+    Mentor.StudentCount = Mentor.StudentCount - 1;
+    await Mentor.save();
+    res.status(200).json({ success: "true", message: "count decreased" });
+  } catch (error) {
+    res.status(500).json({ success: "false", message: error });
+  }
+};
+
 //
 export const submitMarks = async (req, res) => {
   try {
