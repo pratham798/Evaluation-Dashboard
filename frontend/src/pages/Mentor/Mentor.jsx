@@ -195,6 +195,8 @@ const Mentor = ({ data, coach }) => {
                   Design:
                   <input
                     type="number"
+                    min={0}
+                    max={10}
                     name="Design"
                     value={selectedStudent.Design}
                     onChange={handleChange}
@@ -204,6 +206,8 @@ const Mentor = ({ data, coach }) => {
                   Implementation:
                   <input
                     type="number"
+                    min={0}
+                    max={10}
                     name="Implementation"
                     value={selectedStudent.Implementation}
                     onChange={handleChange}
@@ -213,6 +217,8 @@ const Mentor = ({ data, coach }) => {
                   CodeQuality:
                   <input
                     type="number"
+                    min={0}
+                    max={10}
                     name="CodeQuality"
                     value={selectedStudent.CodeQuality}
                     onChange={handleChange}
@@ -222,6 +228,8 @@ const Mentor = ({ data, coach }) => {
                   Explanation:
                   <input
                     type="number"
+                    min={0}
+                    max={10}
                     name="Explanation"
                     value={selectedStudent.Explanation}
                     onChange={handleChange}

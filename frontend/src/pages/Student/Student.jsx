@@ -67,7 +67,9 @@ const Student = ({ data }) => {
       );
       const res = await allMentors.json();
       setMentor(res.data);
-      setCurrentMentor(res.data[0].MentorId);
+      setCurrentMentor(
+        res.data.filter((mentor) => mentor.StudentCount < 4)[0]?.MentorId
+      );
     };
     console.log(students);
     fetchStudents();
@@ -101,6 +103,7 @@ const Student = ({ data }) => {
   //Assigning Students By Mentor Name
   const AssignToMentor = async (student, mentorId) => {
     console.log(student._id + "yo " + mentorId);
+
     const studentId = student._id;
     await fetch(
       `http://localhost:3001/api/v1/students/assign?param1=${studentId}&param2=${mentorId}`,
@@ -182,9 +185,11 @@ const Student = ({ data }) => {
       {/*  */}
       <div className="filter-container">
         <select value={currentMentor} onChange={changeMentor}>
-          {mentor.map((mentors) => (
-            <option value={mentors.MentorId}>{mentors.MentorName}</option>
-          ))}
+          {mentor
+            .filter((mentor) => mentor.StudentCount < 4)
+            .map((mentors) => (
+              <option value={mentors.MentorId}>{mentors.MentorName}</option>
+            ))}
         </select>
         <button
           className="filter-button"
